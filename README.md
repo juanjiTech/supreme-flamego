@@ -1,0 +1,1 @@
+# flameGo template
