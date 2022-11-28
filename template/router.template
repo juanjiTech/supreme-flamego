@@ -2,19 +2,12 @@ package router
 
 import (
 	"github.com/flamego/flamego"
-	"kangaroo/internal/app/{{.appName}}/dto"
-	"kangaroo/internal/app/{{.appName}}/handle"
-	"kangaroo/internal/middleware"
 )
 
 func App{{.appNameExport}}Init(e *flamego.Flame) {
 	e.Group("/api/v1/{{.appName}}", func() {
-		ExampleGroup(e)
+		{{.appNameExport}}Group(e)
 	})
 }
 
-
-func ExampleGroup(e *flamego.Flame) {
-	e.Get("", handle.HandelExampleGet)
-	e.Post("", middleware.InjectRequest[dto.ExamplePost](), handle.HandelExamplePost)
-}
+func {{.appNameExport}}Group(e *flamego.Flame) {}

@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"supreme-flamego/pkg/colorful"
-	"supreme-flamego/pkg/fs"
 	"os"
 	"path"
 	"strings"
+	"supreme-flamego/pkg/colorful"
+	"supreme-flamego/pkg/fs"
 	"text/template"
 )
 
@@ -43,15 +43,21 @@ func load() error {
 	}
 
 	router := path.Join(dir, appName, "router")
-	handler := path.Join(dir, appName, "handler")
+	handlerMain := path.Join(dir, appName, "handler", "v1")
+	handlerType := path.Join(dir, appName, "handler", "v1")
 	dto := path.Join(dir, appName, "dto")
+	e := path.Join(dir, appName, "e")
 	service := path.Join(dir, appName, "service")
+	model := path.Join(dir, appName, "model")
 	trigger := path.Join(dir, "routerInitialize")
 
 	_ = fs.IsNotExistMkDir(router)
-	_ = fs.IsNotExistMkDir(handler)
+	_ = fs.IsNotExistMkDir(handlerType)
+	_ = fs.IsNotExistMkDir(handlerType)
+	_ = fs.IsNotExistMkDir(e)
 	_ = fs.IsNotExistMkDir(dto)
 	_ = fs.IsNotExistMkDir(service)
+	_ = fs.IsNotExistMkDir(model)
 	_ = fs.IsNotExistMkDir(trigger)
 
 	m := map[string]string{}
@@ -59,11 +65,16 @@ func load() error {
 	m["appName"] = strings.ToLower(appName[:1]) + appName[1:]
 
 	router += "/" + m["appName"] + ".go"
-	handler += "/" + m["appName"] + ".go"
+	service += "/" + m["appName"] + ".go"
+	model += "/" + m["appName"] + ".go"
+	handlerMain += "/" + m["appName"] + ".go"
+	handlerType += "/" + "type.go"
 	dto += "/" + m["appName"] + ".go"
 	trigger += "/" + m["appName"] + ".go"
+	e += "/" + m["appName"] + ".go"
 
-	if !force && (fs.FileExist(router) || fs.FileExist(handler) || fs.FileExist(dto) || fs.FileExist(trigger)) {
+	if !force && (fs.FileExist(router) || fs.FileExist(handlerMain) || fs.FileExist(handlerType) ||
+		fs.FileExist(dto) || fs.FileExist(trigger)) || fs.FileExist(service) || fs.FileExist(model) {
 		return errors.New("target file already exist, use -f flag to cover")
 	}
 
@@ -80,7 +91,14 @@ func load() error {
 	} else {
 		var b bytes.Buffer
 		err = rt.Execute(&b, m)
-		fs.FileCreate(b, handler)
+		fs.FileCreate(b, handlerMain)
+	}
+	if rt, err := template.ParseFiles("template/type.template"); err != nil {
+		return err
+	} else {
+		var b bytes.Buffer
+		err = rt.Execute(&b, m)
+		fs.FileCreate(b, handlerType)
 	}
 
 	if rt, err := template.ParseFiles("template/dto.template"); err != nil {
@@ -89,6 +107,27 @@ func load() error {
 		var b bytes.Buffer
 		err = rt.Execute(&b, m)
 		fs.FileCreate(b, dto)
+	}
+	if rt, err := template.ParseFiles("template/e.template"); err != nil {
+		return err
+	} else {
+		var b bytes.Buffer
+		err = rt.Execute(&b, m)
+		fs.FileCreate(b, e)
+	}
+	if rt, err := template.ParseFiles("template/service.template"); err != nil {
+		return err
+	} else {
+		var b bytes.Buffer
+		err = rt.Execute(&b, m)
+		fs.FileCreate(b, service)
+	}
+	if rt, err := template.ParseFiles("template/model.template"); err != nil {
+		return err
+	} else {
+		var b bytes.Buffer
+		err = rt.Execute(&b, m)
+		fs.FileCreate(b, model)
 	}
 
 	if rt, err := template.ParseFiles("template/trigger.template"); err != nil {

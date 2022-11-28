@@ -1,6 +1,6 @@
 package routerInitialize
 
-import {{.appName}} "kangaroo/internal/app/{{.appName}}/router"
+import {{.appName}} "supreme-flamego/internal/app/{{.appName}}/router"
 
 func init() {
 	routers = append(routers, {{.appName}}.App{{.appNameExport}}Init)
