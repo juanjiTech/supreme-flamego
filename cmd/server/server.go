@@ -28,7 +28,7 @@ var (
 	StartCmd  = &cobra.Command{
 		Use:     "server",
 		Short:   "Set Application config info",
-		Example: "main server -c config/settings.yml",
+		Example: "main server -c ./config.yaml",
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("loading config...")
 			conf.LoadConfig(configYml)
@@ -90,5 +90,5 @@ var (
 )
 
 func init() {
-	StartCmd.PersistentFlags().StringVarP(&configYml, "config", "c", "config/config.yaml", "Start server with provided configuration file")
+	//StartCmd.PersistentFlags().StringVarP(&configYml, "config", "c", "config/config.yaml", "Start server with provided configuration file")
 }

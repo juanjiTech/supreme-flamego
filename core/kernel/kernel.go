@@ -120,12 +120,11 @@ func (e *Engine) StartModule() error {
 
 func (e *Engine) Serve() {
 	e.httpSrv = &http.Server{
-		Addr:    conf.GetConfig().Listen + ":" + conf.GetConfig().Port,
 		Handler: e.http,
 	}
 
 	go func() {
-		if err := e.httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := e.httpSrv.Serve(e.listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			fmt.Println(colorful.Red("Got Server Err: " + err.Error()))
 		}
 	}()

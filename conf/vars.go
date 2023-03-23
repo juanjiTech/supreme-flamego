@@ -1,17 +1,13 @@
 package conf
 
 type GlobalConfig struct {
-	MODE        string       `yaml:"Mode"`
-	ProgramName string       `yaml:"ProgramName"`
-	BaseURL     string       `yaml:"BaseURL"`
-	AUTHOR      string       `yaml:"Author"`
-	Listen      string       `yaml:"Listen"`
-	Port        string       `yaml:"Port"`
-	LogPath     string       `yaml:"LogPath"`
-	Databases   []Datasource `yaml:"Databases"`
-	Caches      []Cache      `yaml:"Caches"`
-	SentryDsn   string       `yaml:"SentryDsn"`
-	Auth        struct {
+	MODE      string       `yaml:"Mode"`
+	Port      string       `yaml:"Port"` // grpc和http服务监听端口
+	LogPath   string       `yaml:"LogPath"`
+	Databases []Datasource `yaml:"Databases"`
+	Caches    []Cache      `yaml:"Caches"`
+	SentryDsn string       `yaml:"SentryDsn"`
+	Auth      struct {
 		Secret string `yaml:"Secret"`
 		Issuer string `yaml:"Issuer"`
 	} `yaml:"Auth"`

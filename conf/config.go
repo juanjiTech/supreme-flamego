@@ -15,13 +15,16 @@ var SysVersion = "dev"
 
 var serveConfig *GlobalConfig
 
-func LoadConfig(configYml string) {
-	if !fs.FileExist(configYml) {
-		fmt.Println("cannot find config file")
-		os.Exit(1)
+func LoadConfig(configPath ...string) {
+	if len(configPath) == 0 || configPath[0] == "" {
+		viper.SetConfigName("config")
+		viper.AddConfigPath(".")
+		viper.AddConfigPath("./config")
+	} else {
+		viper.SetConfigFile(configPath[0])
 	}
+
 	serveConfig = new(GlobalConfig)
-	viper.SetConfigFile(configYml)
 	err := viper.ReadInConfig()
 	if err != nil {
 		fmt.Println("Config Read failed: " + err.Error())
@@ -44,16 +47,16 @@ func LoadConfig(configYml string) {
 	viper.WatchConfig()
 }
 
-func GenConfig(configYml string, force bool) error {
-	if !fs.FileExist(configYml) || force {
+func GenYamlConfig(path string, force bool) error {
+	if !fs.FileExist(path) || force {
 		data, _ := yaml.Marshal(&GlobalConfig{MODE: "debug"})
-		err := os.WriteFile(configYml, data, 0644)
+		err := os.WriteFile(path, data, 0644)
 		if err != nil {
 			return errors.New(colorful.Red("Generate file with error: " + err.Error()))
 		}
-		fmt.Println(colorful.Green("config file `config.yaml` generate success in " + configYml))
+		fmt.Println(colorful.Green("Config file `config.yaml` generate success in " + path))
 	} else {
-		return errors.New(colorful.Red(configYml + " already exist, use -f to Force coverage"))
+		return errors.New(colorful.Red(path + " already exist, use -f to Force coverage"))
 	}
 	return nil
 }
