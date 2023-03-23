@@ -2,10 +2,10 @@ package logx
 
 import (
 	"io"
-	"supreme-flamego/config"
-	"supreme-flamego/pkg/colorful"
 	"log"
 	"os"
+	"supreme-flamego/conf"
+	"supreme-flamego/pkg/colorful"
 )
 
 type debugDefault struct {
@@ -13,7 +13,7 @@ type debugDefault struct {
 }
 
 func (d *debugDefault) Println(v ...interface{}) {
-	if config.GetConfig().MODE == "debug" {
+	if conf.GetConfig().MODE == "debug" {
 		d.Debug.Println(v...)
 	}
 }
@@ -26,17 +26,17 @@ var (
 )
 
 func InitLogger() {
-	if config.GetConfig().LogPath == "" {
+	if conf.GetConfig().LogPath == "" {
 		log.Fatalln("LogPath 未设置")
 	}
-	if _, err := os.Stat(config.GetConfig().LogPath); os.IsNotExist(err) {
+	if _, err := os.Stat(conf.GetConfig().LogPath); os.IsNotExist(err) {
 		log.Print("LogPath 不存在")
-		if _, err := os.Create(config.GetConfig().LogPath); err != nil {
+		if _, err := os.Create(conf.GetConfig().LogPath); err != nil {
 			log.Fatalln("新建 LogPath 失败 ", err)
 		}
 		log.Print("新建 LogPath 成功")
 	}
-	errFile, err := os.OpenFile(config.GetConfig().LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	errFile, err := os.OpenFile(conf.GetConfig().LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("打开 LogPath 失败 ", err)
 	}

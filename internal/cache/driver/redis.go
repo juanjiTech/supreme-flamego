@@ -3,7 +3,7 @@ package driver
 import (
 	"fmt"
 	"github.com/go-redis/redis"
-	"supreme-flamego/config"
+	"supreme-flamego/conf"
 	"supreme-flamego/internal/cache/types"
 	"supreme-flamego/pkg/logger"
 	"time"
@@ -11,7 +11,7 @@ import (
 
 type RedisCreator struct{}
 
-func (c RedisCreator) Create(conf config.Cache) (types.Cache, error) {
+func (c RedisCreator) Create(conf conf.Cache) (types.Cache, error) {
 	var r RedisCache
 	r.client = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", conf.IP, conf.PORT),

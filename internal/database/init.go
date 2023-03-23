@@ -2,7 +2,7 @@ package database
 
 import (
 	"gorm.io/gorm"
-	"supreme-flamego/config"
+	"supreme-flamego/conf"
 	"supreme-flamego/pkg/logger"
 	"sync"
 )
@@ -14,7 +14,7 @@ var (
 )
 
 func InitDB() {
-	sources := config.GetConfig().Databases
+	sources := conf.GetConfig().Databases
 	for _, source := range sources {
 		setDbByKey(source.Key, mustCreateGorm(source))
 		if source.Key == "" {
@@ -55,7 +55,7 @@ func setDbByKey(key string, db *gorm.DB) {
 	dbs[key] = db
 }
 
-func mustCreateGorm(database config.Datasource) *gorm.DB {
+func mustCreateGorm(database conf.Datasource) *gorm.DB {
 	var creator = getCreatorByType(database.Type)
 	if creator == nil {
 		logger.NameSpace("database").Fatalf("fail to find creator for types:%s", database.Type)

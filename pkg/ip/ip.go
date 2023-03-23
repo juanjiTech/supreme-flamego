@@ -1,14 +1,15 @@
 package ip
 
 import (
-	"supreme-flamego/pkg/colorful"
+	"fmt"
 	"net"
+	"supreme-flamego/pkg/colorful"
 )
 
 func GetLocalHost() (res []string) {
 	netInterfaces, err := net.Interfaces()
 	if err != nil {
-		println(colorful.Red("net.Interfaces failed, err: " + err.Error()))
+		fmt.Println(colorful.Red("net.Interfaces failed, err: " + err.Error()))
 	}
 
 	for i := 0; i < len(netInterfaces); i++ {

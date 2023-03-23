@@ -4,9 +4,9 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"supreme-flamego/config"
 	"log"
 	"os"
+	"supreme-flamego/conf"
 )
 
 // NameSpace - 提供带有模块命名空间的logger
@@ -15,11 +15,11 @@ func NameSpace(name string) *zap.SugaredLogger {
 }
 
 func getLogWriter() zapcore.WriteSyncer {
-	if config.GetConfig().LogPath == "" {
+	if conf.GetConfig().LogPath == "" {
 		log.Fatalln("LogPath 未设置")
 	}
 	lj := &lumberjack.Logger{
-		Filename:   config.GetConfig().LogPath,
+		Filename:   conf.GetConfig().LogPath,
 		MaxSize:    5,
 		MaxBackups: 5,
 		MaxAge:     30,

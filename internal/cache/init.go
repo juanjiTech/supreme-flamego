@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"supreme-flamego/config"
+	"supreme-flamego/conf"
 	"supreme-flamego/internal/cache/types"
 	"supreme-flamego/pkg/logger"
 	"sync"
@@ -13,7 +13,7 @@ var (
 )
 
 func InitCache() {
-	sources := config.GetConfig().Caches
+	sources := conf.GetConfig().Caches
 	for _, source := range sources {
 		setCacheByKey(source.Key, mustCreateCache(source))
 		if source.Key == "" {
@@ -44,7 +44,7 @@ func setCacheByKey(key string, cache types.Cache) {
 	dbs[key] = cache
 }
 
-func mustCreateCache(conf config.Cache) types.Cache {
+func mustCreateCache(conf conf.Cache) types.Cache {
 	var creator = getCreatorByType(conf.Type)
 	if creator == nil {
 		logger.NameSpace("cache").Fatal("fail to find creator for cache types:%s", conf.Type)

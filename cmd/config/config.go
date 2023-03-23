@@ -1,9 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
-	"supreme-flamego/config"
 	"os"
+	"supreme-flamego/conf"
 )
 
 var (
@@ -12,12 +13,12 @@ var (
 	StartCmd  = &cobra.Command{
 		Use:     "config",
 		Short:   "Generate config file",
-		Example: "app config -p config/config.yaml -f",
+		Example: "mod config -p config/config.yaml -f",
 		Run: func(cmd *cobra.Command, args []string) {
-			println("Generate config...")
+			fmt.Println("Generate config...")
 			err := load()
 			if err != nil {
-				println(err.Error())
+				fmt.Println(err.Error())
 				os.Exit(1)
 			}
 		},
@@ -30,5 +31,5 @@ func init() {
 }
 
 func load() error {
-	return config.GenConfig(configYml, forceGen)
+	return conf.GenConfig(configYml, forceGen)
 }

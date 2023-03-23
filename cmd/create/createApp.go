@@ -2,6 +2,7 @@ package create
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"os"
@@ -18,34 +19,34 @@ var (
 	force    bool
 	StartCmd = &cobra.Command{
 		Use:     "create",
-		Short:   "create a new app",
-		Example: "app create -n users",
+		Short:   "create a new mod",
+		Example: "mod create -n users",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := load()
 			if err != nil {
-				println(colorful.Red(err.Error()))
+				fmt.Println(colorful.Red(err.Error()))
 				os.Exit(1)
 			}
-			println(colorful.Green("App " + appName + " generate success under " + dir))
+			fmt.Println(colorful.Green("App " + appName + " generate success under " + dir))
 		},
 	}
 )
 
 func init() {
-	StartCmd.PersistentFlags().StringVarP(&appName, "name", "n", "", "create a new app with provided name")
-	StartCmd.PersistentFlags().StringVarP(&dir, "path", "p", "internal/app", "new file will generate under provided path")
-	StartCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "Force generate the app")
+	StartCmd.PersistentFlags().StringVarP(&appName, "name", "n", "", "create a new mod with provided name")
+	StartCmd.PersistentFlags().StringVarP(&dir, "path", "p", "internal/mod", "new file will generate under provided path")
+	StartCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "Force generate the mod")
 }
 
 func load() error {
 	if appName == "" {
-		return errors.New("app name should not be empty, use -n")
+		return errors.New("mod name should not be empty, use -n")
 	}
 
 	router := path.Join(dir, appName, "router")
 	handlerMain := path.Join(dir, appName, "handler", "v1")
 	handlerType := path.Join(dir, appName, "handler", "v1")
-	dto := path.Join(dir, appName, "dto")
+	dto := path.Join(dir, appName, "dao")
 	e := path.Join(dir, appName, "e")
 	service := path.Join(dir, appName, "service")
 	model := path.Join(dir, appName, "model")
@@ -101,7 +102,7 @@ func load() error {
 		fs.FileCreate(b, handlerType)
 	}
 
-	if rt, err := template.ParseFiles("template/dto.template"); err != nil {
+	if rt, err := template.ParseFiles("template/dao.template"); err != nil {
 		return err
 	} else {
 		var b bytes.Buffer

@@ -3,7 +3,7 @@ package jwt
 import (
 	"errors"
 	"github.com/golang-jwt/jwt"
-	"supreme-flamego/config"
+	"supreme-flamego/conf"
 	"supreme-flamego/internal/models"
 	"time"
 )
@@ -21,17 +21,17 @@ func GenToken(info models.UserInfo) (string, error) {
 		Info: info,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(),
-			Issuer:    config.GetConfig().Auth.Issuer,
+			Issuer:    conf.GetConfig().Auth.Issuer,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
-	return token.SignedString([]byte(config.GetConfig().Auth.Secret))
+	return token.SignedString([]byte(conf.GetConfig().Auth.Secret))
 }
 
 // ParseToken 解析JWT
 func ParseToken(tokenString string) (*JWTClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (i interface{}, err error) {
-		return []byte(config.GetConfig().Auth.Secret), nil
+		return []byte(conf.GetConfig().Auth.Secret), nil
 	})
 	if err != nil {
 		return nil, err
