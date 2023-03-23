@@ -14,8 +14,8 @@ import (
 	"net/http"
 	"supreme-flamego/conf"
 	"supreme-flamego/core/discov"
+	"supreme-flamego/core/logx"
 	"supreme-flamego/pkg/colorful"
-	"supreme-flamego/pkg/logger"
 	"sync"
 	"time"
 )
@@ -61,6 +61,7 @@ func New(config ...Config) *Engine {
 		listener: config[0].Listener,
 		Mysql:    config[0].MySQL,
 		Cache:    config[0].Redis,
+		modules:  make(map[string]Module),
 	}
 }
 
@@ -82,35 +83,35 @@ func (e *Engine) StartModule() error {
 	}
 	for _, m := range e.modules {
 		h4m := hub
-		h4m.Logger = logger.NameSpace("module." + m.Name())
+		h4m.Logger = logx.NameSpace("module." + m.Name())
 		if err := m.PreInit(&h4m); err != nil {
 			return err
 		}
 	}
 	for _, m := range e.modules {
 		h4m := hub
-		h4m.Logger = logger.NameSpace("module." + m.Name())
+		h4m.Logger = logx.NameSpace("module." + m.Name())
 		if err := m.Init(&h4m); err != nil {
 			return err
 		}
 	}
 	for _, m := range e.modules {
 		h4m := hub
-		h4m.Logger = logger.NameSpace("module." + m.Name())
+		h4m.Logger = logx.NameSpace("module." + m.Name())
 		if err := m.PostInit(&h4m); err != nil {
 			return err
 		}
 	}
 	for _, m := range e.modules {
 		h4m := hub
-		h4m.Logger = logger.NameSpace("module." + m.Name())
+		h4m.Logger = logx.NameSpace("module." + m.Name())
 		if err := m.Load(&h4m); err != nil {
 			return err
 		}
 	}
 	for _, m := range e.modules {
 		h4m := hub
-		h4m.Logger = logger.NameSpace("module." + m.Name())
+		h4m.Logger = logx.NameSpace("module." + m.Name())
 		if err := m.Start(&h4m); err != nil {
 			return err
 		}

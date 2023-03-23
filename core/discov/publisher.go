@@ -3,10 +3,10 @@ package discov
 import (
 	"fmt"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.uber.org/zap"
 	"os"
 	"supreme-flamego/core/discov/internal"
 	"supreme-flamego/core/langx"
-	"supreme-flamego/core/logx"
 	"supreme-flamego/core/syncx"
 	"supreme-flamego/core/threadx"
 	"time"
@@ -91,12 +91,12 @@ func (p *Publisher) doKeepAlive() error {
 		default:
 			cli, err := p.doRegister()
 			if err != nil {
-				logx.Error("etcd publisher doRegister: ", err.Error())
+				zap.S().Error("etcd publisher doRegister: ", err.Error())
 				break
 			}
 
 			if err := p.keepAliveAsync(cli); err != nil {
-				logx.Error("etcd publisher keepAliveAsync: ", err.Error())
+				zap.S().Error("etcd publisher keepAliveAsync: ", err.Error())
 				break
 			}
 
@@ -130,17 +130,17 @@ func (p *Publisher) keepAliveAsync(cli internal.EtcdClient) error {
 				if !ok {
 					p.revoke(cli)
 					if err := p.doKeepAlive(); err != nil {
-						logx.Error("etcd publisher KeepAlive: ", err.Error())
+						zap.S().Error("etcd publisher KeepAlive: ", err.Error())
 					}
 					return
 				}
 			case <-p.pauseChan:
-				logx.Info(fmt.Sprintf("paused etcd renew, key: %s, value: %s", p.key, p.value))
+				zap.S().Info(fmt.Sprintf("paused etcd renew, key: %s, value: %s", p.key, p.value))
 				p.revoke(cli)
 				select {
 				case <-p.resumeChan:
 					if err := p.doKeepAlive(); err != nil {
-						logx.Error("etcd publisher KeepAlive: ", err.Error())
+						zap.S().Error("etcd publisher KeepAlive: ", err.Error())
 					}
 					return
 				case <-p.quit.Done():
@@ -175,7 +175,7 @@ func (p *Publisher) register(client internal.EtcdClient) (clientv3.LeaseID, erro
 
 func (p *Publisher) revoke(cli internal.EtcdClient) {
 	if _, err := cli.Revoke(cli.Ctx(), p.lease); err != nil {
-		logx.Error("etcd publisher revoke: ", err.Error())
+		zap.S().Error("etcd publisher revoke: ", err.Error())
 	}
 }
 
@@ -198,7 +198,7 @@ func WithPubEtcdTLS(certFile, certKeyFile, caFile string, insecureSkipVerify boo
 	return func(pub *Publisher) {
 		err := RegisterTLS(pub.endpoints, certFile, certKeyFile, caFile, insecureSkipVerify)
 		if err != nil {
-			logx.Error(err)
+			zap.S().Error(err)
 			os.Exit(1)
 		}
 	}

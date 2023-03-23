@@ -2,8 +2,8 @@ package cache
 
 import (
 	"supreme-flamego/conf"
+	"supreme-flamego/core/logx"
 	"supreme-flamego/internal/cache/types"
-	"supreme-flamego/pkg/logger"
 	"sync"
 )
 
@@ -19,7 +19,7 @@ func InitCache() {
 		if source.Key == "" {
 			source.Key = "*"
 		}
-		logger.NameSpace("cache").Infof("create cache %s => %s:%s", source.Key, source.IP, source.PORT)
+		logx.NameSpace("cache").Infof("create cache %s => %s:%s", source.Key, source.IP, source.PORT)
 	}
 }
 
@@ -37,7 +37,7 @@ func setCacheByKey(key string, cache types.Cache) {
 		key = "*"
 	}
 	if GetCache(key) != nil {
-		logger.NameSpace("cache").Error("duplicate db key: ", key)
+		logx.NameSpace("cache").Error("duplicate db key: ", key)
 	}
 	mux.Lock()
 	defer mux.Unlock()
@@ -47,12 +47,12 @@ func setCacheByKey(key string, cache types.Cache) {
 func mustCreateCache(conf conf.Cache) types.Cache {
 	var creator = getCreatorByType(conf.Type)
 	if creator == nil {
-		logger.NameSpace("cache").Fatal("fail to find creator for cache types:%s", conf.Type)
+		logx.NameSpace("cache").Fatal("fail to find creator for cache types:%s", conf.Type)
 		return nil
 	}
 	cache, err := creator.Create(conf)
 	if err != nil {
-		logger.NameSpace("cache").Fatal(err)
+		logx.NameSpace("cache").Fatal(err)
 		return nil
 	}
 	return cache

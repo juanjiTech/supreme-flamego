@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"supreme-flamego/internal/cache"
 	"supreme-flamego/internal/database"
-	"supreme-flamego/internal/websocket"
 	"supreme-flamego/pkg/format"
 	"supreme-flamego/pkg/utils/page"
+	"supreme-flamego/pkg/websocket"
 )
 
 func InjectDB(key ...string) flamego.Handler {

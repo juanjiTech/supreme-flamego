@@ -1,8 +1,8 @@
 package websocket
 
 import (
-	"supreme-flamego/pkg/logger"
 	"net/http"
+	"supreme-flamego/core/logx"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -89,13 +89,13 @@ func (c *socketClient) readPump() {
 		c.manager.unregister <- c
 		err := c.conn.Close()
 		if err != nil {
-			logger.NameSpace("manager").Error(err)
+			logx.NameSpace("manager").Error(err)
 		}
 	}()
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
-			logger.NameSpace("manager").Errorf("error: %v", err)
+			logx.NameSpace("manager").Errorf("error: %v", err)
 			break
 		}
 		c.manager.receive <- map[*socketClient][]byte{
@@ -111,7 +111,7 @@ func (c *socketClient) writePump() {
 	defer func() {
 		err := c.conn.Close()
 		if err != nil {
-			logger.NameSpace("manager").Error(err)
+			logx.NameSpace("manager").Error(err)
 		}
 	}()
 	for {
@@ -155,7 +155,7 @@ func (m *SocketManager) SendAllSocket(message string) {
 func (m *SocketManager) ServeSocket(w http.ResponseWriter, r *http.Request, n string) {
 	conn, err := upGrader.Upgrade(w, r, nil)
 	if err != nil {
-		logger.NameSpace("manager").Error(err)
+		logx.NameSpace("manager").Error(err)
 		return
 	}
 	client := &socketClient{name: n, manager: m, conn: conn, send: make(chan []byte, 256)}
@@ -169,7 +169,7 @@ func InitSocketManager(key string) {
 		key = "*"
 	}
 	if _, ok := managers[key]; ok {
-		logger.NameSpace("manager").Error("socket manager key duplication")
+		logx.NameSpace("manager").Error("socket manager key duplication")
 	}
 	m := newManager()
 	go m.run()
@@ -180,6 +180,6 @@ func GetSocketManager(key string) *SocketManager {
 	if m, ok := managers[key]; ok {
 		return m
 	}
-	logger.NameSpace("manager").Error("socket client ", key, " not found")
+	logx.NameSpace("manager").Error("socket client ", key, " not found")
 	return nil
 }

@@ -31,6 +31,7 @@ func (a *App) PostInit(h *kernel.Hub) error {
 }
 
 func (a *App) Load(h *kernel.Hub) error {
+	h.Http.Get("/ping", func() string { return "pong" })
 	return nil
 }
 
@@ -39,5 +40,6 @@ func (a *App) Start(h *kernel.Hub) error {
 }
 
 func (a *App) Stop(wg *sync.WaitGroup, ctx context.Context) error {
+	defer wg.Done()
 	return nil
 }

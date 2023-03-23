@@ -2,7 +2,7 @@ package sonyflake
 
 import (
 	"github.com/sony/sonyflake"
-	"supreme-flamego/pkg/logger"
+	"supreme-flamego/core/logx"
 )
 
 var flake *sonyflake.Sonyflake
@@ -14,7 +14,7 @@ func init() {
 func GenSonyFlakeId() (int64, error) {
 	id, err := flake.NextID()
 	if err != nil {
-		logger.NameSpace("sonyFlakeId").Warn("flake NextID failed: ", err)
+		logx.NameSpace("sonyFlakeId").Warn("flake NextID failed: ", err)
 		return 0, err
 	}
 	return int64(id), nil

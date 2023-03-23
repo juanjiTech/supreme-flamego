@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/flamego/flamego"
-	"supreme-flamego/pkg/logger"
+	"supreme-flamego/core/logx"
 	"supreme-flamego/pkg/utils/gen/snowflake"
 	"time"
 )
@@ -11,7 +11,7 @@ import (
 func RequestLog() flamego.Handler {
 	return func(c flamego.Context) {
 		traceId := snowflake.Node.Generate().String()
-		log := logger.NameSpace("access")
+		log := logx.NameSpace("access")
 		c.Map(*log)
 		// 开始时间
 		startTime := time.Now()

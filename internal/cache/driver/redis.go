@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"supreme-flamego/conf"
+	"supreme-flamego/core/logx"
 	"supreme-flamego/internal/cache/types"
-	"supreme-flamego/pkg/logger"
 	"time"
 )
 
@@ -20,7 +20,7 @@ func (c RedisCreator) Create(conf conf.Cache) (types.Cache, error) {
 	})
 	_, err := r.client.Ping().Result()
 	if err != nil {
-		logger.NameSpace("redis").Fatal(err)
+		logx.NameSpace("redis").Fatal(err)
 	}
 	return r, nil
 }
@@ -35,7 +35,7 @@ func (r RedisCache) GetInt(key string) (int, bool) {
 		return value, true
 	}
 	if err != redis.Nil {
-		logger.NameSpace("redis").Error(err)
+		logx.NameSpace("redis").Error(err)
 	}
 	return 0, false
 }
@@ -46,7 +46,7 @@ func (r RedisCache) GetInt64(key string) (int64, bool) {
 		return value, true
 	}
 	if err != redis.Nil {
-		logger.NameSpace("redis").Error(err)
+		logx.NameSpace("redis").Error(err)
 	}
 	return 0, false
 }
@@ -57,7 +57,7 @@ func (r RedisCache) GetFloat32(key string) (float32, bool) {
 		return value, true
 	}
 	if err != redis.Nil {
-		logger.NameSpace("redis").Error(err)
+		logx.NameSpace("redis").Error(err)
 	}
 	return 0, false
 }
@@ -68,7 +68,7 @@ func (r RedisCache) GetFloat64(key string) (float64, bool) {
 		return value, true
 	}
 	if err != redis.Nil {
-		logger.NameSpace("redis").Error(err)
+		logx.NameSpace("redis").Error(err)
 	}
 	return 0, false
 }
@@ -79,7 +79,7 @@ func (r RedisCache) GetString(key string) (string, bool) {
 		return value, true
 	}
 	if err != redis.Nil {
-		logger.NameSpace("redis").Error(err)
+		logx.NameSpace("redis").Error(err)
 	}
 	return "", false
 }
@@ -87,7 +87,7 @@ func (r RedisCache) GetString(key string) (string, bool) {
 func (r RedisCache) GetBool(key string) (bool, bool) {
 	value, err := r.client.Get(key).Result()
 	if err != redis.Nil {
-		logger.NameSpace("redis").Error(err)
+		logx.NameSpace("redis").Error(err)
 	}
 	if value == "1" {
 		return true, true
@@ -106,7 +106,7 @@ func (r RedisCache) Del(key string) bool {
 	if err == redis.Nil {
 		return false
 	} else if err != nil {
-		logger.NameSpace("redis").Error(err)
+		logx.NameSpace("redis").Error(err)
 	}
 	return true
 }

@@ -10,17 +10,17 @@ import (
 	"os/signal"
 	"supreme-flamego/conf"
 	"supreme-flamego/core/kernel"
+	"supreme-flamego/core/logx"
 	"supreme-flamego/internal/cache"
 	"supreme-flamego/internal/database"
 	"supreme-flamego/internal/mod/example"
-	"supreme-flamego/internal/sentry"
 	"supreme-flamego/pkg/colorful"
 	"supreme-flamego/pkg/ip"
-	"supreme-flamego/pkg/logger"
+	"supreme-flamego/pkg/sentry"
 	"syscall"
 )
 
-var log = logger.NameSpace("cmd.server")
+var log = logx.NameSpace("cmd.server")
 
 var (
 	configYml string
@@ -39,9 +39,9 @@ var (
 				sentry.Init()
 			}
 			if conf.GetConfig().MODE == "" || conf.GetConfig().MODE == "debug" {
-				logger.Init(zapcore.DebugLevel)
+				logx.Init(zapcore.DebugLevel)
 			} else {
-				logger.Init(zapcore.InfoLevel)
+				logx.Init(zapcore.InfoLevel)
 			}
 			database.InitDB()
 			cache.InitCache()

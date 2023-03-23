@@ -1,50 +1,46 @@
 package logx
 
 import (
-	"context"
-	"time"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
+	"log"
+	"os"
+	"supreme-flamego/conf"
 )
 
-// A Logger represents a logger.
-type Logger interface {
-	// Debug logs a message at info level.
-	Debug(...any)
-	// Debugf logs a message at info level.
-	Debugf(string, ...any)
-	// Debugv logs a message at info level.
-	Debugv(any)
-	// Debugw logs a message at info level.
-	Debugw(string, ...LogField)
-	// Error logs a message at error level.
-	Error(...any)
-	// Errorf logs a message at error level.
-	Errorf(string, ...any)
-	// Errorv logs a message at error level.
-	Errorv(any)
-	// Errorw logs a message at error level.
-	Errorw(string, ...LogField)
-	// Info logs a message at info level.
-	Info(...any)
-	// Infof logs a message at info level.
-	Infof(string, ...any)
-	// Infov logs a message at info level.
-	Infov(any)
-	// Infow logs a message at info level.
-	Infow(string, ...LogField)
-	// Slow logs a message at slow level.
-	Slow(...any)
-	// Slowf logs a message at slow level.
-	Slowf(string, ...any)
-	// Slowv logs a message at slow level.
-	Slowv(any)
-	// Sloww logs a message at slow level.
-	Sloww(string, ...LogField)
-	// WithCallerSkip returns a new logger with the given caller skip.
-	WithCallerSkip(skip int) Logger
-	// WithContext returns a new logger with the given context.
-	WithContext(ctx context.Context) Logger
-	// WithDuration returns a new logger with the given duration.
-	WithDuration(d time.Duration) Logger
-	// WithFields returns a new logger with the given fields.
-	WithFields(fields ...LogField) Logger
+// NameSpace - 提供带有模块命名空间的logger
+func NameSpace(name string) *zap.SugaredLogger {
+	return zap.S().Named(name)
+}
+
+func getLogWriter() zapcore.WriteSyncer {
+	if conf.GetConfig().LogPath == "" {
+		log.Fatalln("LogPath 未设置")
+	}
+	lj := &lumberjack.Logger{
+		Filename:   conf.GetConfig().LogPath,
+		MaxSize:    5,
+		MaxBackups: 5,
+		MaxAge:     30,
+		Compress:   true,
+	}
+	return zapcore.AddSync(lj)
+}
+
+func getEncoder() zapcore.Encoder {
+	encoderConfig := zap.NewDevelopmentEncoderConfig()
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	return zapcore.NewConsoleEncoder(encoderConfig)
+}
+
+func Init(level zapcore.LevelEnabler) {
+	writeSyncer := getLogWriter()
+	if level == zapcore.DebugLevel {
+		writeSyncer = zapcore.NewMultiWriteSyncer(writeSyncer, zapcore.AddSync(os.Stdout))
+	}
+	encoder := getEncoder()
+	core := zapcore.NewCore(encoder, writeSyncer, level)
+	zap.ReplaceGlobals(zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel)))
 }
