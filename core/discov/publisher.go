@@ -8,6 +8,7 @@ import (
 	"supreme-flamego/core/discov/internal"
 	"supreme-flamego/core/langx"
 	"supreme-flamego/core/syncx"
+	"supreme-flamego/core/systemx"
 	"supreme-flamego/core/threadx"
 	"time"
 )
@@ -58,9 +59,9 @@ func (p *Publisher) KeepAlive() error {
 		return err
 	}
 
-	//systemx.AddWrapUpListener(func() {
-	//	p.Stop()
-	//})
+	systemx.AddWrapUpListener(func() {
+		p.Stop()
+	})
 
 	return p.keepAliveAsync(cli)
 }
