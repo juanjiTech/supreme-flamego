@@ -3,8 +3,8 @@ package kernel
 import (
 	"context"
 	"github.com/flamego/flamego"
-	"github.com/flamego/flamego/inject"
 	"github.com/go-redis/redis/v8"
+	"github.com/juanjiTech/inject"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"

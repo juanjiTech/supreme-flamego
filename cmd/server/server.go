@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/flamego/flamego"
+	"github.com/soheilhy/cmux"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap/zapcore"
 	"net"
@@ -14,6 +15,7 @@ import (
 	"supreme-flamego/internal/cache"
 	"supreme-flamego/internal/database"
 	"supreme-flamego/internal/mod/example"
+	"supreme-flamego/internal/mod/flame"
 	"supreme-flamego/pkg/colorful"
 	"supreme-flamego/pkg/ip"
 	"supreme-flamego/pkg/sentry"
@@ -52,11 +54,16 @@ var (
 			if err != nil {
 				log.Fatalw("failed to listen", "error", err)
 			}
+			tcpMux := cmux.New(conn)
 			log.Infow("start listening", "port", conf.GetConfig().Port)
 			k := kernel.New(kernel.Config{
 				Listener: conn,
 				MySQL:    database.GetDB("*")})
-			k.RegMod(&example.App{})
+			k.Map(&tcpMux)
+			k.RegMod(
+				&example.Mod{},
+				&flame.Mod{},
+			)
 			k.Init()
 			log.Info("init kernel complete")
 
@@ -69,6 +76,11 @@ var (
 
 			log.Info("starting Server...")
 			k.Serve()
+			go func() {
+				if err := tcpMux.Serve(); err != nil {
+					panic(err)
+				}
+			}()
 
 			fmt.Println(colorful.Green("Server run at:"))
 			fmt.Println(fmt.Sprintf("-  Local:   http://localhost:%s", conf.GetConfig().Port))
@@ -85,6 +97,7 @@ var (
 			if err != nil {
 				panic(err)
 			}
+			tcpMux.Close()
 		},
 	}
 )
