@@ -24,7 +24,7 @@ import (
 
 type Engine struct {
 	config Config
-	// 下面这些将会转为private
+	// 下面这些将会从模组以依赖注入的形式加入内核
 	Mysql      *gorm.DB
 	Cache      *redis.Client
 	http       *flamego.Flame
