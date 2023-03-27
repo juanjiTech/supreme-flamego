@@ -3,6 +3,7 @@ package kernel
 import (
 	"context"
 	"github.com/flamego/flamego"
+	"github.com/flamego/flamego/inject"
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -11,6 +12,7 @@ import (
 )
 
 type Hub struct {
+	inject.Injector
 	Logger *zap.SugaredLogger
 	Http   *flamego.Flame
 	Grpc   *grpc.Server

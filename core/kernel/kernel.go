@@ -6,10 +6,12 @@ import (
 	"fmt"
 	sentryflame "github.com/asjdf/flamego-sentry"
 	"github.com/flamego/flamego"
+	"github.com/flamego/flamego/inject"
 	"github.com/go-redis/redis/v8"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
+	"log"
 	"net"
 	"net/http"
 	"supreme-flamego/conf"
@@ -41,6 +43,7 @@ type Engine struct {
 
 	listener net.Listener
 
+	inject.Injector
 	modules   map[string]Module
 	modulesMu sync.Mutex
 }
@@ -61,6 +64,7 @@ func New(config ...Config) *Engine {
 		listener: config[0].Listener,
 		Mysql:    config[0].MySQL,
 		Cache:    config[0].Redis,
+		Injector: inject.New(),
 		modules:  make(map[string]Module),
 	}
 }
@@ -68,7 +72,20 @@ func New(config ...Config) *Engine {
 func (e *Engine) Init() {
 	e.Ctx, e.Cancel = context.WithCancel(context.Background())
 	e.http = flamego.New()
-	e.http.Use(flamego.Recovery())
+	e.http.Use(flamego.LoggerInvoker(func(c flamego.Context, log *log.Logger) {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Printf("PANIC: %s", err)
+
+				// Lookup the current ResponseWriter
+				val := c.Value(inject.InterfaceOf((*http.ResponseWriter)(nil)))
+				w := val.Interface().(http.ResponseWriter)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}()
+
+		c.Next()
+	}))
 	if e.config.EnableSentry {
 		e.http.Use(sentryflame.New(sentryflame.Options{Repanic: true}))
 	}
@@ -76,10 +93,11 @@ func (e *Engine) Init() {
 
 func (e *Engine) StartModule() error {
 	hub := Hub{
-		Http:  e.http,
-		Grpc:  e.grpc,
-		Mysql: e.Mysql,
-		Cache: e.Cache,
+		Injector: e.Injector,
+		Http:     e.http,
+		Grpc:     e.grpc,
+		Mysql:    e.Mysql,
+		Cache:    e.Cache,
 	}
 	for _, m := range e.modules {
 		h4m := hub
