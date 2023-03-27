@@ -9,8 +9,8 @@ import (
 	"github.com/flamego/flamego"
 	"github.com/juanjiTech/inject"
 	"github.com/soheilhy/cmux"
+	"net"
 	"net/http"
-	"reflect"
 	"supreme-flamego/conf"
 	"supreme-flamego/core/kernel"
 	"supreme-flamego/pkg/colorful"
@@ -23,8 +23,9 @@ var _ kernel.Module = (*Mod)(nil)
 type Mod struct {
 	kernel.UnimplementedModule // 请为所有Module引入UnimplementedModule
 
-	flame   *flamego.Flame
-	httpSrv *http.Server
+	listener net.Listener
+	flame    *flamego.Flame
+	httpSrv  *http.Server
 }
 
 func (m *Mod) Name() string {
@@ -65,22 +66,23 @@ func (m *Mod) PostInit(h *kernel.Hub) error {
 }
 
 func (m *Mod) Load(h *kernel.Hub) error {
-	var flame *flamego.Flame
-	flame, ok := h.Value(reflect.TypeOf(flame)).Interface().(*flamego.Flame)
-	if !ok {
-		return errors.New("flameGo didn't injected to kernel")
+	var flame flamego.Flame
+	err := h.Load(&flame)
+	if err != nil {
+		return errors.New("can't load flame from kernel")
 	}
 	return nil
 }
 
 func (m *Mod) Start(h *kernel.Hub) error {
-	var tcpMux *cmux.CMux
-	tcpMux, ok := h.Value(reflect.TypeOf(tcpMux)).Interface().(*cmux.CMux)
-	if !ok {
-		return errors.New("flameGo didn't injected to kernel")
+	var tcpMux cmux.CMux
+	err := h.Load(&tcpMux)
+	if err != nil {
+		return errors.New("can't load tcpMux from kernel")
 	}
 
-	httpL := (*tcpMux).Match(cmux.HTTP1Fast())
+	httpL := tcpMux.Match(cmux.HTTP1Fast())
+	m.listener = httpL
 	m.httpSrv = &http.Server{
 		Handler: m.flame,
 	}

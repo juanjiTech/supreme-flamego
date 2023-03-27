@@ -39,11 +39,13 @@ func (m *Mod) Load(h *kernel.Hub) error {
 	str := h.Value(reflect.TypeOf("string")).String() // 从内核获取上面注册的依赖
 	fmt.Println(str)
 	_, _ = h.Invoke(func(s string) { fmt.Println(s) }) // 也可以这样从内核获取上面注册的依赖
+	var str2 string
+	_ = h.Load(&str2) // 也可以这样从内核获取上面注册的依赖
 
-	var http *flamego.Flame
-	http, ok := h.Value(reflect.TypeOf(http)).Interface().(*flamego.Flame)
-	if !ok {
-		return errors.New("flameGo didn't injected to kernel")
+	var http flamego.Flame
+	err := h.Load(&http)
+	if err != nil {
+		return errors.New("can't load flame from kernel")
 	}
 	http.Get("/ping", func() string { return "pong" })
 	return nil
