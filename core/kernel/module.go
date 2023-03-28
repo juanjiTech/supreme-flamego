@@ -2,22 +2,14 @@ package kernel
 
 import (
 	"context"
-	"github.com/flamego/flamego"
-	"github.com/go-redis/redis/v8"
 	"github.com/juanjiTech/inject"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"gorm.io/gorm"
 	"sync"
 )
 
 type Hub struct {
 	inject.Injector
 	Logger *zap.SugaredLogger
-	Http   *flamego.Flame
-	Grpc   *grpc.Server
-	Mysql  *gorm.DB
-	Cache  *redis.Client
 }
 
 type Module interface {
