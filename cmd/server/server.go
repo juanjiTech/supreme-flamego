@@ -12,6 +12,7 @@ import (
 	"supreme-flamego/conf"
 	"supreme-flamego/core/kernel"
 	"supreme-flamego/core/logx"
+	"supreme-flamego/internal/mod/dbLite"
 	"supreme-flamego/internal/mod/example"
 	"supreme-flamego/internal/mod/flame"
 	"supreme-flamego/pkg/colorful"
@@ -58,6 +59,7 @@ var (
 			k.RegMod(
 				&example.Mod{},
 				&flame.Mod{},
+				&dbLite.Mod{},
 			)
 			k.Init()
 			log.Info("init kernel complete")
@@ -72,9 +74,7 @@ var (
 			log.Info("starting Server...")
 			k.Serve()
 			go func() {
-				if err := tcpMux.Serve(); err != nil {
-					panic(err)
-				}
+				_ = tcpMux.Serve()
 			}()
 
 			fmt.Println(colorful.Green("Server run at:"))
