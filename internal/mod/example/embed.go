@@ -6,5 +6,5 @@ import "embed"
 // and since embed does not support import relative dir,
 // we move embed from "modGenerator" to "example"
 //
-//go:embed "*"
+//go:embed *
 var FS embed.FS

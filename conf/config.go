@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"os"
 	"supreme-flamego/pkg/colorful"
-	"supreme-flamego/pkg/fs"
+	"supreme-flamego/pkg/fsx"
 )
 
 var SysVersion = "dev"
@@ -48,7 +48,7 @@ func LoadConfig(configPath ...string) {
 }
 
 func GenYamlConfig(path string, force bool) error {
-	if !fs.FileExist(path) || force {
+	if !fsx.FileExist(path) || force {
 		data, _ := yaml.Marshal(&GlobalConfig{MODE: "debug"})
 		err := os.WriteFile(path, data, 0644)
 		if err != nil {
