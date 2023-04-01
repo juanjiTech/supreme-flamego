@@ -2,9 +2,7 @@ package kernel
 
 import (
 	"context"
-	"github.com/go-redis/redis/v8"
 	"github.com/juanjiTech/inject"
-	"gorm.io/gorm"
 	"net"
 	"supreme-flamego/conf"
 	"supreme-flamego/core/logx"
@@ -39,8 +37,6 @@ type Engine struct {
 
 type Config struct {
 	Listener     net.Listener
-	MySQL        *gorm.DB
-	Redis        *redis.Client
 	EnableSentry bool
 }
 

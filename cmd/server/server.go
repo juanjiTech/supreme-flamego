@@ -12,8 +12,6 @@ import (
 	"supreme-flamego/conf"
 	"supreme-flamego/core/kernel"
 	"supreme-flamego/core/logx"
-	"supreme-flamego/internal/cache"
-	"supreme-flamego/internal/database"
 	"supreme-flamego/internal/mod/example"
 	"supreme-flamego/internal/mod/flame"
 	"supreme-flamego/pkg/colorful"
@@ -45,8 +43,6 @@ var (
 			} else {
 				logx.Init(zapcore.InfoLevel)
 			}
-			database.InitDB()
-			cache.InitCache()
 			log.Info("init dep complete")
 
 			log.Info("init kernel...")
@@ -57,8 +53,7 @@ var (
 			tcpMux := cmux.New(conn)
 			log.Infow("start listening", "port", conf.GetConfig().Port)
 			k := kernel.New(kernel.Config{
-				Listener: conn,
-				MySQL:    database.GetDB("*")})
+				Listener: conn})
 			k.Map(&tcpMux)
 			k.RegMod(
 				&example.Mod{},
