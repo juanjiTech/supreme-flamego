@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"github.com/flamego/flamego"
 	"github.com/soheilhy/cmux"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap/zapcore"
@@ -25,7 +24,6 @@ var log = logx.NameSpace("cmd.server")
 
 var (
 	configYml string
-	e         *flamego.Flame
 	StartCmd  = &cobra.Command{
 		Use:     "server",
 		Short:   "Set Application config info",
