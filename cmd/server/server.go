@@ -1,112 +1,99 @@
 package server
 
 import (
-	"context"
-	"errors"
 	"fmt"
-	sentryflame "github.com/asjdf/flamego-sentry"
-	"github.com/flamego/flamego"
+	"github.com/soheilhy/cmux"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap/zapcore"
-	"net/http"
+	"net"
 	"os"
 	"os/signal"
-	"supreme-flamego/config"
-	"supreme-flamego/internal/app/routerInitialize"
-	"supreme-flamego/internal/cache"
-	"supreme-flamego/internal/database"
-	"supreme-flamego/internal/sentry"
+	"supreme-flamego/conf"
+	"supreme-flamego/core/kernel"
+	"supreme-flamego/core/logx"
+	"supreme-flamego/internal/mod/dbLite"
+	"supreme-flamego/internal/mod/example"
+	"supreme-flamego/internal/mod/flame"
 	"supreme-flamego/pkg/colorful"
 	"supreme-flamego/pkg/ip"
-	"supreme-flamego/pkg/logger"
+	"supreme-flamego/pkg/sentry"
 	"syscall"
-	"time"
 )
+
+var log = logx.NameSpace("cmd.server")
 
 var (
 	configYml string
-	e         *flamego.Flame
 	StartCmd  = &cobra.Command{
 		Use:     "server",
 		Short:   "Set Application config info",
-		Example: "main server -c config/settings.yml",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			println("loading config...")
-			setUp()
-			println("loading config complete")
-			println("loading api...")
-			load()
-			println("loading api complete")
-		},
+		Example: "main server -c ./config.yaml",
 		Run: func(cmd *cobra.Command, args []string) {
-			println("starting Server...")
-			run()
+			log.Info("loading config...")
+			conf.LoadConfig(configYml)
+			log.Info("loading config complete")
+
+			log.Info("init dep...")
+			if conf.GetConfig().SentryDsn != "" {
+				sentry.Init()
+			}
+			if conf.GetConfig().MODE == "" || conf.GetConfig().MODE == "debug" {
+				logx.Init(zapcore.DebugLevel)
+			} else {
+				logx.Init(zapcore.InfoLevel)
+			}
+			log.Info("init dep complete")
+
+			log.Info("init kernel...")
+			conn, err := net.Listen("tcp", fmt.Sprintf(":%s", conf.GetConfig().Port))
+			if err != nil {
+				log.Fatalw("failed to listen", "error", err)
+			}
+			tcpMux := cmux.New(conn)
+			log.Infow("start listening", "port", conf.GetConfig().Port)
+			k := kernel.New(kernel.Config{
+				Listener: conn})
+			k.Map(&tcpMux)
+			k.RegMod(
+				&example.Mod{},
+				&flame.Mod{},
+				&dbLite.Mod{},
+			)
+			k.Init()
+			log.Info("init kernel complete")
+
+			log.Info("init module...")
+			err = k.StartModule()
+			if err != nil {
+				panic(err)
+			}
+			log.Info("init module complete")
+
+			log.Info("starting Server...")
+			k.Serve()
+			go func() {
+				_ = tcpMux.Serve()
+			}()
+
+			fmt.Println(colorful.Green("Server run at:"))
+			fmt.Println(fmt.Sprintf("-  Local:   http://localhost:%s", conf.GetConfig().Port))
+			for _, host := range ip.GetLocalHost() {
+				fmt.Println(fmt.Sprintf("-  Network: http://%s:%s", host, conf.GetConfig().Port))
+			}
+
+			quit := make(chan os.Signal, 1)
+			signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+			<-quit
+			fmt.Println(colorful.Blue("Shutting down server..."))
+
+			err = k.Stop()
+			if err != nil {
+				panic(err)
+			}
 		},
 	}
 )
 
 func init() {
-	StartCmd.PersistentFlags().StringVarP(&configYml, "config", "c", "config/config.yaml", "Start server with provided configuration file")
-}
-
-func setUp() {
-	// 顺序不能变 logger依赖config logger后面的同时依赖logger和config 否则crash
-	config.LoadConfig(configYml)
-
-	if config.GetConfig().SentryDsn != "" {
-		sentry.Init()
-	}
-
-	if config.GetConfig().MODE == "" || config.GetConfig().MODE == "debug" {
-		logger.Init(zapcore.DebugLevel)
-	} else {
-		logger.Init(zapcore.InfoLevel)
-	}
-
-	database.InitDB()
-	cache.InitCache()
-}
-
-func load() {
-	flamego.SetEnv(flamego.EnvType(config.GetConfig().MODE))
-	e = flamego.New()
-	e.Use(flamego.Recovery())
-	if config.GetConfig().SentryDsn != "" {
-		e.Use(sentryflame.New(sentryflame.Options{Repanic: true}))
-	}
-
-	routerInitialize.ApiInit(e)
-}
-
-func run() {
-	srv := &http.Server{
-		Addr:    config.GetConfig().Listen + ":" + config.GetConfig().Port,
-		Handler: e,
-	}
-
-	go func() {
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			println(colorful.Red("Got Server Err: " + err.Error()))
-		}
-	}()
-
-	println(colorful.Green("Server run at:"))
-	println(fmt.Sprintf("-  Local:   http://localhost:%s", config.GetConfig().Port))
-	for _, host := range ip.GetLocalHost() {
-		println(fmt.Sprintf("-  Network: http://%s:%s", host, config.GetConfig().Port))
-	}
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	println(colorful.Blue("Shutting down server..."))
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		println(colorful.Yellow("Server forced to shutdown: " + err.Error()))
-	}
-
-	println(colorful.Green("Server exiting Correctly"))
+	//StartCmd.PersistentFlags().StringVarP(&configYml, "config", "c", "config/config.yaml", "Start server with provided configuration file")
 }

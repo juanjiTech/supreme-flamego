@@ -2,17 +2,17 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"os"
 	"supreme-flamego/cmd/config"
 	"supreme-flamego/cmd/create"
 	"supreme-flamego/cmd/server"
-	"os"
 )
 
 var rootCmd = &cobra.Command{
-	Use:          "app",
-	Short:        "app",
+	Use:          "mod",
+	Short:        "mod",
 	SilenceUsage: true,
-	Long:         `app`,
+	Long:         `mod`,
 }
 
 func init() {

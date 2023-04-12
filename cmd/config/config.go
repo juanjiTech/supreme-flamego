@@ -1,23 +1,24 @@
 package config
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
-	"supreme-flamego/config"
 	"os"
+	"supreme-flamego/conf"
 )
 
 var (
-	configYml string
-	forceGen  bool
-	StartCmd  = &cobra.Command{
+	configPath string
+	forceGen   bool
+	StartCmd   = &cobra.Command{
 		Use:     "config",
 		Short:   "Generate config file",
-		Example: "app config -p config/config.yaml -f",
+		Example: "mod config -p ./config.yaml -f",
 		Run: func(cmd *cobra.Command, args []string) {
-			println("Generate config...")
+			fmt.Println("Generating config...")
 			err := load()
 			if err != nil {
-				println(err.Error())
+				fmt.Println(err.Error())
 				os.Exit(1)
 			}
 		},
@@ -25,10 +26,10 @@ var (
 )
 
 func init() {
-	StartCmd.PersistentFlags().StringVarP(&configYml, "path", "p", "config/config.yaml", "Generate config in provided path")
+	StartCmd.PersistentFlags().StringVarP(&configPath, "path", "p", "./config.yaml", "Generate config in provided path")
 	StartCmd.PersistentFlags().BoolVarP(&forceGen, "force", "f", false, "Force generate config in provided path")
 }
 
 func load() error {
-	return config.GenConfig(configYml, forceGen)
+	return conf.GenYamlConfig(configPath, forceGen)
 }

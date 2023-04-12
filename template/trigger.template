@@ -1,7 +1,0 @@
-package routerInitialize
-
-import {{.appName}} "supreme-flamego/internal/app/{{.appName}}/router"
-
-func init() {
-	routers = append(routers, {{.appName}}.App{{.appNameExport}}Init)
-}
