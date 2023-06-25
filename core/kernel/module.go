@@ -20,6 +20,8 @@ type Module interface {
 	Load(*Hub) error
 	Start(*Hub) error
 	Stop(wg *sync.WaitGroup, ctx context.Context) error
+	Config() any
+
 	mustEmbedUnimplementedModule()
 }
 
@@ -69,6 +71,10 @@ func (u *UnimplementedModule) Start(*Hub) error {
 
 func (u *UnimplementedModule) Stop(wg *sync.WaitGroup, _ context.Context) error {
 	defer wg.Done()
+	return nil
+}
+
+func (u *UnimplementedModule) Config() any {
 	return nil
 }
 
