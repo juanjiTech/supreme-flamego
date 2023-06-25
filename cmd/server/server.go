@@ -76,9 +76,9 @@ var (
 			}()
 
 			fmt.Println(colorful.Green("Server run at:"))
-			fmt.Println(fmt.Sprintf("-  Local:   http://localhost:%s", conf.GetConfig().Port))
+			fmt.Printf("-  Local:   http://localhost:%s\n", conf.GetConfig().Port)
 			for _, host := range ip.GetLocalHost() {
-				fmt.Println(fmt.Sprintf("-  Network: http://%s:%s", host, conf.GetConfig().Port))
+				fmt.Printf("-  Network: http://%s:%s\n", host, conf.GetConfig().Port)
 			}
 
 			quit := make(chan os.Signal, 1)
