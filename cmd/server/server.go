@@ -26,7 +26,7 @@ var (
 	configYml string
 	StartCmd  = &cobra.Command{
 		Use:     "server",
-		Short:   "Set Application config info",
+		Short:   "Start a server",
 		Example: "main server -c ./config.yaml",
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info("loading config...")
